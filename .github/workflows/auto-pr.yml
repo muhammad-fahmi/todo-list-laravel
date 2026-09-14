@@ -1,0 +1,68 @@
+name: Auto Create Pull Request for Review
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - master
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-create-pr:
+    name: Create Pull Request for Review
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create or Check Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_NAME="${{ github.ref_name }}"
+          echo "Processing pushed branch: $BRANCH_NAME"
+
+          # Check if an open PR already exists for this branch
+          EXISTING_PR=$(gh pr list --head "$BRANCH_NAME" --base main --state open --json number,url --jq '.[0].url')
+
+          if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
+            echo "Pull Request already exists: $EXISTING_PR"
+          else
+            COMMIT_MSG=$(git log -1 --pretty=%s)
+            PR_TITLE="review: $BRANCH_NAME - $COMMIT_MSG"
+            
+            PR_BODY="## 🔍 Pull Request for Review
+
+### 🌿 Source Branch
+\`$BRANCH_NAME\` → \`main\`
+
+### 📝 Latest Commit
+> $COMMIT_MSG
+
+---
+
+### 🧪 Automated CI/CD Verification
+The automated CI pipeline will run on this Pull Request to verify:
+- [x] **Backend API Tests (Laravel 13 & PHP 8.4):** Pest/PHPUnit tests, Laravel Pint code style, route validation.
+- [x] **Frontend SPA (React 19 & TypeScript):** Oxlint, TypeScript compiler check, production Vite bundle.
+- [x] **Live Docker Container E2E Test:** Multi-stage production container build, database migrations, HTTP ingress, and JWT authentication test.
+
+---
+
+### 👤 Reviewer Action
+Please inspect the file diffs and approve this Pull Request when CI checks pass before merging into \`main\`."
+
+            PR_URL=$(gh pr create \
+              --title "$PR_TITLE" \
+              --body "$PR_BODY" \
+              --base main \
+              --head "$BRANCH_NAME")
+
+            echo "Successfully created Pull Request: $PR_URL"
+          fi

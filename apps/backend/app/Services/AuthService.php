@@ -18,7 +18,7 @@ class AuthService
     /**
      * Register a new user and generate an initial JWT authentication token.
      *
-     * @param array{name: string, email: string, password: string} $data Validated user registration credentials.
+     * @param  array{name: string, email: string, password: string}  $data  Validated user registration credentials.
      * @return array{user: User, token: string, token_type: string, expires_in: int}
      */
     public function register(array $data): array
@@ -43,7 +43,7 @@ class AuthService
     /**
      * Authenticate credentials and generate a JWT token.
      *
-     * @param array{email: string, password: string} $credentials User login credentials.
+     * @param  array{email: string, password: string}  $credentials  User login credentials.
      * @return array{user: User, token: string, token_type: string, expires_in: int}|null Null if authentication fails.
      */
     public function login(array $credentials): ?array

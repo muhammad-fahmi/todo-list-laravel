@@ -28,7 +28,7 @@ class TagService
     /**
      * Create a new tag for the user.
      *
-     * @param array{name: string, color?: string} $data
+     * @param  array{name: string, color?: string}  $data
      */
     public function createTag(User $user, array $data): Tag
     {

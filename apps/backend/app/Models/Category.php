@@ -23,7 +23,6 @@ use Illuminate\Support\Carbon;
  * @property string|null $icon
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
  * @property-read User $user
  * @property-read Collection<int, Todo> $todos
  */

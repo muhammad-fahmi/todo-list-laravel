@@ -31,7 +31,7 @@ class CategoryService
     /**
      * Create a new category for the user.
      *
-     * @param array{name: string, color?: string, icon?: string|null} $data
+     * @param  array{name: string, color?: string, icon?: string|null}  $data
      */
     public function createCategory(User $user, array $data): Category
     {
@@ -45,7 +45,7 @@ class CategoryService
     /**
      * Update an existing category.
      *
-     * @param array{name?: string, color?: string, icon?: string|null} $data
+     * @param  array{name?: string, color?: string, icon?: string|null}  $data
      */
     public function updateCategory(Category $category, array $data): Category
     {

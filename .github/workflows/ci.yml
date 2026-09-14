@@ -8,7 +8,7 @@ on:
 
 jobs:
   backend-tests:
-    name: Backend API Tests (Laravel 13 & PHP 8.4)
+    name: Backend API Tests & Standards (Laravel 13 & PHP 8.4)
     runs-on: ubuntu-latest
 
     steps:
@@ -33,12 +33,22 @@ jobs:
         working-directory: apps/backend
         run: composer install --prefer-dist --no-interaction --no-progress
 
+      - name: Check Code Standards (Laravel Pint)
+        working-directory: apps/backend
+        run: vendor/bin/pint --test
+
       - name: Prepare Environment & Keys
         working-directory: apps/backend
         run: |
           cp .env.example .env
           php artisan key:generate
           php artisan jwt:secret --force
+
+      - name: Validate Routes & Configuration
+        working-directory: apps/backend
+        run: |
+          php artisan route:list
+          php artisan config:clear
 
       - name: Execute Automated Test Suite
         working-directory: apps/backend
@@ -71,8 +81,8 @@ jobs:
         working-directory: apps/frontend
         run: npm run build
 
-  docker-validation:
-    name: Docker Compose Build Verification
+  e2e-docker-verification:
+    name: Full-Stack Docker Container End-to-End Verification
     runs-on: ubuntu-latest
     needs: [backend-tests, frontend-build]
 
@@ -88,5 +98,25 @@ jobs:
           docker compose -f docker-compose.dev.yml config --quiet
           docker compose -f docker-compose.prod.yml config --quiet
 
-      - name: Build Production Containers
-        run: docker compose -f docker-compose.prod.yml build
+      - name: Build and Launch Production Stack
+        run: docker compose -f docker-compose.prod.yml up -d --build
+
+      - name: Run Container Database Migrations
+        run: docker compose -f docker-compose.prod.yml exec -T backend-api php artisan migrate --force
+
+      - name: Verify Frontend SPA Ingress (Port 80)
+        run: |
+          curl --fail --retry 5 --retry-delay 2 --retry-connrefused -I http://localhost/
+
+      - name: Verify Backend REST API Gateway & Authentication
+        run: |
+          REGISTER_RES=$(curl --fail --retry 5 --retry-delay 2 --retry-connrefused -s -X POST http://localhost/api/v1/auth/register \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -d '{"name":"CI E2E User","email":"e2e@example.com","password":"password123","password_confirmation":"password123"}')
+          echo "Registration Response: $REGISTER_RES"
+          echo "$REGISTER_RES" | grep -q '"success":true'
+
+      - name: Tear Down Production Stack
+        if: always()
+        run: docker compose -f docker-compose.prod.yml down

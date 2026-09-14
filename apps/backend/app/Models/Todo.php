@@ -27,7 +27,6 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $completed_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
  * @property-read User $user
  * @property-read Category|null $category
  * @property-read Collection<int, Tag> $tags

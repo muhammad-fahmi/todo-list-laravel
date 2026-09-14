@@ -19,9 +19,9 @@ class TodoService
     /**
      * Retrieve paginated todos for a given user with flexible filtering and sorting.
      *
-     * @param User $user The authenticated user owning the todos.
-     * @param array<string, mixed> $filters Search, status, priority, and date filters.
-     * @param int $perPage Number of results per page.
+     * @param  User  $user  The authenticated user owning the todos.
+     * @param  array<string, mixed>  $filters  Search, status, priority, and date filters.
+     * @param  int  $perPage  Number of results per page.
      * @return LengthAwarePaginator<Todo>
      */
     public function getPaginatedTodos(User $user, array $filters = [], int $perPage = 15): LengthAwarePaginator
@@ -46,7 +46,7 @@ class TodoService
 
         // Text Search
         if (! empty($filters['search'])) {
-            $search = '%' . trim((string) $filters['search']) . '%';
+            $search = '%'.trim((string) $filters['search']).'%';
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', $search)
                     ->orWhere('description', 'like', $search);
@@ -79,8 +79,8 @@ class TodoService
     /**
      * Create a new Todo item for the user.
      *
-     * @param User $user The authenticated task owner.
-     * @param array<string, mixed> $data Validated task attributes.
+     * @param  User  $user  The authenticated task owner.
+     * @param  array<string, mixed>  $data  Validated task attributes.
      */
     public function createTodo(User $user, array $data): Todo
     {
@@ -107,8 +107,8 @@ class TodoService
     /**
      * Update an existing Todo item.
      *
-     * @param Todo $todo The task to update.
-     * @param array<string, mixed> $data Validated update attributes.
+     * @param  Todo  $todo  The task to update.
+     * @param  array<string, mixed>  $data  Validated update attributes.
      */
     public function updateTodo(Todo $todo, array $data): Todo
     {
@@ -139,7 +139,7 @@ class TodoService
     /**
      * Toggle the completed status of a Todo task.
      *
-     * @param Todo $todo The task to toggle.
+     * @param  Todo  $todo  The task to toggle.
      */
     public function toggleStatus(Todo $todo): Todo
     {
@@ -155,7 +155,7 @@ class TodoService
     /**
      * Delete a Todo task.
      *
-     * @param Todo $todo The task to delete.
+     * @param  Todo  $todo  The task to delete.
      */
     public function deleteTodo(Todo $todo): void
     {
@@ -165,7 +165,7 @@ class TodoService
     /**
      * Compute aggregated statistics and metrics for the user's tasks.
      *
-     * @param User $user The authenticated user.
+     * @param  User  $user  The authenticated user.
      * @return array{
      *     total: int,
      *     completed: int,

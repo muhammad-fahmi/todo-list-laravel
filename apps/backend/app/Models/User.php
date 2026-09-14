@@ -26,7 +26,6 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  * @property string|null $remember_token
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
  * @property-read Collection<int, Todo> $todos
  * @property-read Collection<int, Category> $categories
  * @property-read Collection<int, Tag> $tags

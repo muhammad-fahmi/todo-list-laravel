@@ -22,7 +22,6 @@ use Illuminate\Support\Carbon;
  * @property string $color
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
  * @property-read User $user
  * @property-read Collection<int, Todo> $todos
  */
