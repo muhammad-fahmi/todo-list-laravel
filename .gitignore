@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Environment files
+.env
+.env.backup
+.env.production
+*.env.local
+
+# Build artifacts
+dist/
+build/
+.output/
+
+# Laravel Storage & Cache
+apps/backend/storage/*.key
+apps/backend/storage/framework/cache/*
+apps/backend/storage/framework/sessions/*
+apps/backend/storage/framework/views/*
+apps/backend/storage/logs/*
+!apps/backend/storage/framework/cache/.gitignore
+!apps/backend/storage/framework/sessions/.gitignore
+!apps/backend/storage/framework/views/.gitignore
+!apps/backend/storage/logs/.gitignore
+apps/backend/bootstrap/cache/*
+!apps/backend/bootstrap/cache/.gitignore
+apps/backend/public/storage
+apps/backend/public/hot
+
+# SQLite Database
+*.sqlite
+*.sqlite-journal
+
+# Logs & System
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Docker volumes
+.docker/
+todo_pgdata/

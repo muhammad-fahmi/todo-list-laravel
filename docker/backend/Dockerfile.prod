@@ -1,0 +1,56 @@
+# Stage 1: Build Dependencies via Composer
+FROM composer:2 AS composer-builder
+
+WORKDIR /app
+
+# Cache composer dependencies
+COPY apps/backend/composer.json apps/backend/composer.lock ./
+RUN composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --no-interaction \
+    --no-scripts \
+    --prefer-dist
+
+# Copy application source code and dump complete optimized autoloader
+COPY apps/backend ./
+RUN composer dump-autoload --optimize --no-dev
+
+# Stage 2: Production PHP-FPM Runtime
+FROM php:8.4-fpm-alpine
+
+RUN apk add --no-cache \
+    libpng-dev \
+    libzip-dev \
+    postgresql-dev \
+    oniguruma-dev \
+    fcgi
+
+RUN docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    pdo_mysql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    zip \
+    opcache
+
+WORKDIR /var/www/backend
+
+# Copy full application codebase with vendor autoloader from builder
+COPY --from=composer-builder /app /var/www/backend
+
+# Copy custom PHP configuration
+COPY docker/backend/php.ini /usr/local/etc/php/conf.d/custom.ini
+
+# Set permissions for web server user
+RUN chown -R www-data:www-data /var/www/backend/storage /var/www/backend/bootstrap/cache
+
+USER www-data
+
+EXPOSE 9000
+
+CMD ["php-fpm"]

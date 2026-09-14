@@ -1,0 +1,54 @@
+FROM php:8.4-fpm-alpine
+
+# Install system dependencies & build tools
+RUN apk add --no-cache \
+    curl \
+    git \
+    bash \
+    zip \
+    unzip \
+    libpng-dev \
+    libxml2-dev \
+    libzip-dev \
+    postgresql-dev \
+    oniguruma-dev \
+    linux-headers
+
+# Install PHP extensions required by Laravel & JWT
+RUN docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    pdo_mysql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    zip
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/backend
+
+# Copy composer files and install dependencies without scripts (artisan not yet present)
+COPY apps/backend/composer.json apps/backend/composer.lock ./
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+
+# Copy custom PHP configuration
+COPY docker/backend/php.ini /usr/local/etc/php/conf.d/custom.ini
+
+# Copy backend codebase
+COPY apps/backend /var/www/backend
+
+# Run dump-autoload with scripts now that artisan and codebase are present
+RUN composer dump-autoload --optimize
+
+# Set proper permissions for storage and cache
+RUN chown -R www-data:www-data /var/www/backend/storage /var/www/backend/bootstrap/cache
+
+# Expose PHP-FPM port
+EXPOSE 9000
+
+CMD ["php-fpm"]

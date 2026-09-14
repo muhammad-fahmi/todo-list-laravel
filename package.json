@@ -1,0 +1,40 @@
+{
+  "name": "todo-list-laravel-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack Todo application monorepo with Laravel, React, shadcn/ui, JWT, and Docker server simulation",
+  "scripts": {
+    "dev:frontend": "cd apps/frontend && npm run dev",
+    "dev:backend": "cd apps/backend && php artisan serve --port=8000",
+    "dev": "npm run dev:frontend",
+    "build:frontend": "cd apps/frontend && npm run build",
+    "build": "npm run build:frontend",
+    "test:backend": "cd apps/backend && php artisan test",
+    "test:frontend": "cd apps/frontend && npm run lint",
+    "test": "npm run test:backend",
+    "docker:dev": "docker compose -f docker-compose.dev.yml up -d --build",
+    "docker:dev:down": "docker compose -f docker-compose.dev.yml down",
+    "docker:dev:logs": "docker compose -f docker-compose.dev.yml logs -f",
+    "docker:prod": "docker compose -f docker-compose.prod.yml up -d --build",
+    "docker:prod:down": "docker compose -f docker-compose.prod.yml down",
+    "sync:frontend:dev": "docker cp apps/frontend/src/. todo-frontend-dev:/app/src/",
+    "sync:backend:dev": "docker cp apps/backend/app/. todo-backend-dev:/var/www/backend/app/",
+    "sync:dev": "npm run sync:frontend:dev && npm run sync:backend:dev",
+    "update:frontend:dev": "docker compose -f docker-compose.dev.yml up -d --build frontend-spa",
+    "update:backend:dev": "docker compose -f docker-compose.dev.yml up -d --build backend-api",
+    "update:dev": "docker compose -f docker-compose.dev.yml up -d --build",
+    "update:prod": "docker compose -f docker-compose.prod.yml up -d --build",
+    "artisan:dev": "docker compose -f docker-compose.dev.yml exec backend-api php artisan",
+    "artisan:prod": "docker compose -f docker-compose.prod.yml exec backend-api php artisan"
+  },
+  "keywords": [
+    "laravel",
+    "react",
+    "monorepo",
+    "shadcn",
+    "jwt",
+    "docker"
+  ],
+  "author": "",
+  "license": "MIT"
+}

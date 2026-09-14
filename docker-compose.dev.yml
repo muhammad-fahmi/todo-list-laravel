@@ -1,0 +1,86 @@
+services:
+  nginx-gateway:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile.dev
+    container_name: todo-nginx-dev
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend-api
+      - frontend-spa
+    networks:
+      - todo_network
+
+  backend-api:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile.dev
+    container_name: todo-backend-dev
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_KEY: base64:ckRuwUBXKn4X17CeFFWCwmKOnbb0/ynuhS7LQebsoT4=
+      JWT_SECRET: SvnCbM7pzx36tytyTa6UzV20x9g48TRSuKnayCO40Ck5BYHoTWR53y7dMLyruADH
+      JWT_ALGO: HS256
+      DB_CONNECTION: pgsql
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_DATABASE: todo_app
+      DB_USERNAME: todo_user
+      DB_PASSWORD: secret
+      REDIS_HOST: redis
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - todo_network
+
+  frontend-spa:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile.dev
+    container_name: todo-frontend-dev
+    environment:
+      VITE_API_URL: /api/v1
+    networks:
+      - todo_network
+
+  database:
+    image: postgres:16-alpine
+    container_name: todo-database-dev
+    environment:
+      POSTGRES_DB: todo_app
+      POSTGRES_USER: todo_user
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - todo_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U todo_user -d todo_app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - todo_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: todo-redis-dev
+    ports:
+      - "6379:6379"
+    networks:
+      - todo_network
+
+volumes:
+  todo_pgdata:
+    driver: local
+
+networks:
+  todo_network:
+    driver: bridge
