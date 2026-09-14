@@ -191,5 +191,20 @@ TaskFlow features zero-perceived latency for user interactions:
 
 ---
 
+## 🔄 CI/CD & Code Review Workflow
+
+Every push to the repository is automatically validated through GitHub Actions:
+- **Backend API Tests & Standards:** Executes Laravel Pint formatting verification, route and config validation, and 13 feature tests (60 assertions) against in-memory database.
+- **Frontend SPA Checks:** Executes Oxlint linter, TypeScript compiler checks (`tsc -b`), and production Vite bundling.
+- **Full-Stack Docker E2E Verification:** Automatically builds the multi-stage production Docker containers, spins up the stack, executes database migrations, and validates live HTTP ingress and JWT authentication.
+
+### Automated Pull Request Workflow for Reviewers
+Whenever changes are pushed to any branch (e.g., `git push origin feature/...`):
+1. GitHub Actions automatically checks if an open Pull Request targeting `main` exists.
+2. If not, it automatically generates a formatted Pull Request with commit notes and CI checklists.
+3. Reviewers can inspect the code diffs and approve the Pull Request before merging into `main`.
+
+---
+
 ## 📄 License
 MIT
