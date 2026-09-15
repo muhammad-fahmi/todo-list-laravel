@@ -25,7 +25,11 @@
     "update:dev": "docker compose -f docker-compose.dev.yml up -d --build",
     "update:prod": "docker compose -f docker-compose.prod.yml up -d --build",
     "artisan:dev": "docker compose -f docker-compose.dev.yml exec backend-api php artisan",
-    "artisan:prod": "docker compose -f docker-compose.prod.yml exec backend-api php artisan"
+    "artisan:prod": "docker compose -f docker-compose.prod.yml exec backend-api php artisan",
+    "pr:create": "gh pr create --base main --fill",
+    "pr:status": "gh pr status",
+    "pr:checks": "gh pr checks",
+    "ci:status": "gh run list -L 5"
   },
   "keywords": [
     "laravel",
