@@ -3,8 +3,8 @@ name: Auto Create Pull Request for Review
 on:
   push:
     branches-ignore:
-      - main
-      - master
+      - 'main'
+      - 'master'
 
 permissions:
   contents: write
@@ -29,40 +29,39 @@ jobs:
           echo "Processing pushed branch: $BRANCH_NAME"
 
           # Check if an open PR already exists for this branch
-          EXISTING_PR=$(gh pr list --head "$BRANCH_NAME" --base main --state open --json number,url --jq '.[0].url')
+          EXISTING_PR=$(gh pr list --head "$BRANCH_NAME" --base main --state open --json number,url --jq '.[0].url' || true)
 
           if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
             echo "Pull Request already exists: $EXISTING_PR"
           else
             COMMIT_MSG=$(git log -1 --pretty=%s)
             PR_TITLE="review: $BRANCH_NAME - $COMMIT_MSG"
-            
-            PR_BODY="## 🔍 Pull Request for Review
 
-### 🌿 Source Branch
-\`$BRANCH_NAME\` → \`main\`
+            cat << 'EOF' > /tmp/pr_body.md
+          ## 🔍 Pull Request for Review
 
-### 📝 Latest Commit
-> $COMMIT_MSG
+          ### 🌿 Source Branch
+          Branch changes ready for review into `main`.
 
----
+          ---
 
-### 🧪 Automated CI/CD Verification
-The automated CI pipeline will run on this Pull Request to verify:
-- [x] **Backend API Tests (Laravel 13 & PHP 8.4):** Pest/PHPUnit tests, Laravel Pint code style, route validation.
-- [x] **Frontend SPA (React 19 & TypeScript):** Oxlint, TypeScript compiler check, production Vite bundle.
-- [x] **Live Docker Container E2E Test:** Multi-stage production container build, database migrations, HTTP ingress, and JWT authentication test.
+          ### 🧪 Automated CI/CD Verification
+          The automated CI pipeline runs on this Pull Request to verify:
+          - [x] **Backend API Tests (Laravel 13 & PHP 8.4):** PHPUnit tests, Laravel Pint code style, route validation.
+          - [x] **Frontend SPA (React 19 & TypeScript):** Oxlint, TypeScript strict compilation, production Vite bundle.
+          - [x] **Live Docker Container E2E Test:** Multi-stage production container build, database migrations, HTTP ingress, and JWT auth test.
 
----
+          ---
 
-### 👤 Reviewer Action
-Please inspect the file diffs and approve this Pull Request when CI checks pass before merging into \`main\`."
+          ### 👤 Reviewer Action
+          Please inspect the file diffs and approve this Pull Request when CI checks pass before merging into `main`.
+          EOF
 
             PR_URL=$(gh pr create \
               --title "$PR_TITLE" \
-              --body "$PR_BODY" \
+              --body-file /tmp/pr_body.md \
               --base main \
-              --head "$BRANCH_NAME")
+              --head "$BRANCH_NAME" || true)
 
-            echo "Successfully created Pull Request: $PR_URL"
+            echo "Pull Request status: $PR_URL"
           fi
